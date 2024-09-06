@@ -6,6 +6,17 @@ from PIL import Image
 import numpy as np
 import os
 
+import spacy
+# Check if the model is already installed
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    # If not, download and install the model
+    from spacy.cli import download
+    download("en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
+
+
 app = Flask(__name__)
 
 # Load the saved model
