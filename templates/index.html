@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,15 +17,19 @@
             justify-content: center;
             height: 100vh;
         }
+
         h1 {
             color: #333;
         }
+
         form {
             margin-bottom: 20px;
         }
+
         input[type="file"] {
             margin-bottom: 10px;
         }
+
         button {
             background-color: #007bff;
             color: white;
@@ -33,27 +38,33 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         .container {
             max-width: 600px;
             width: 100%;
             text-align: center;
         }
+
         .image-preview {
             margin: 20px 0;
         }
+
         .image-preview img {
             max-width: 100%;
             height: auto;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         .result {
             margin: 20px 0;
             font-size: 18px;
         }
+
         .result img {
             max-width: 100%;
             height: auto;
@@ -62,6 +73,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Pokédex</h1>
@@ -71,16 +83,24 @@
         </form>
 
         {% if predicted_pokemon %}
-            <div class="image-preview">
-                <h2>Uploaded Image:</h2>
-                <img src="{{ url_for('static', filename='uploaded_image.jpg') }}" alt="Uploaded Image">
-            </div>
-            <div class="result">
-                <h2>Prediction Result:</h2>
-                <p><strong>Pokémon Name:</strong> {{ predicted_pokemon }}</p>
-                <p><strong>Similarity:</strong> {{ similarity_percentage }}%</p>
-            </div>
+        <div class="image-preview">
+            <h2>Uploaded Image:</h2>
+            <img src="{{ image_url }}" alt="Uploaded Image">
+        </div>
+
+        {% if predicted_image_base64 %}
+        <div class="image-preview">
+            <h2>Predicted Pokémon:</h2>
+            <img src="data:image/jpeg;base64,{{ predicted_image_base64 }}" alt="Predicted Pokémon">
+        </div>
+        {% endif %}
+
+        <div class="result">
+            <p><strong>Pokémon Name:</strong> {{ predicted_pokemon }}</p>
+            <p><strong>Similarity:</strong> {{ similarity_percentage | round(2) }}%</p>
+        </div>
         {% endif %}
     </div>
 </body>
+
 </html>

@@ -5,6 +5,8 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from PIL import Image
 import numpy as np
 import os
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -69,6 +71,13 @@ def get_representative_image(pokemon_folder):
         return None
     return None
 
+# Function to convert image to base64
+def image_to_base64(image):
+    buffered = BytesIO()
+    image.save(buffered, format="JPEG")
+    img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    return img_base64
+
 # Route for image upload and prediction
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -84,18 +93,24 @@ def predict():
     
     predicted_class, similarity_percentage = predict_pokemon(img_array)
     predicted_pokemon = get_prediction_details(predicted_class)
-    
+
     # Get the representative image from the dataset
     representative_image_path = get_representative_image(predicted_pokemon)
     if representative_image_path:
-        # Save the predicted image
-        predicted_image_path = os.path.join('static', 'predicted_image.jpg')
         predicted_image = Image.open(representative_image_path)
-        predicted_image.save(predicted_image_path)
+        max_width = 150  
+        max_height = int(predicted_image.height * (max_width / predicted_image.width))
+        predicted_image = predicted_image.resize((max_width, max_height))
+        
+        # Convert the predicted image to base64
+        predicted_image_base64 = image_to_base64(predicted_image)
     else:
-        predicted_image_path = url_for('static', filename='default_image.jpg')  # Use a default image if none found
-    
-    return render_template('index.html', predicted_pokemon=predicted_pokemon, similarity_percentage=similarity_percentage, image_url=url_for('static', filename='uploaded_image.jpg'), predicted_image_url=url_for('static', filename='predicted_image.jpg'))
+        predicted_image_base64 = None  # Use None if no image is found
+
+    return render_template('index.html', predicted_pokemon=predicted_pokemon, 
+                           similarity_percentage=similarity_percentage, 
+                           image_url=url_for('static', filename='uploaded_image.jpg'), 
+                           predicted_image_base64=predicted_image_base64)
 
 @app.route("/")
 def index():
