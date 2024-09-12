@@ -5,102 +5,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokédex</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 
-        h1 {
-            color: #333;
-        }
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-        form {
-            margin-bottom: 20px;
-        }
-
-        input[type="file"] {
-            margin-bottom: 10px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .container {
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .image-preview {
-            margin: 20px 0;
-        }
-
-        .image-preview img {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .result {
-            margin: 20px 0;
-            font-size: 18px;
-        }
-
-        .result img {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="wrapper">
         <h1>Pokédex</h1>
-        <form action="/predict" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" required>
-            <button type="submit">Predict!</button>
-        </form>
+        <div class="container">
+            <form action="/predict" method="post" enctype="multipart/form-data" onsubmit="showSpinner()">
+                <label for="file">Choose an image</label>
+                <input type="file" id="file" name="file" accept="image/*" required onchange="showFileName()">
+                <span class="file-name" id="file-name">No file chosen</span>
+                <button type="submit">Predict!</button>
+                <div class="spinner" id="spinner"></div>
+            </form>
 
-        {% if predicted_pokemon %}
-        <div class="image-preview">
-            <h2>Uploaded Image:</h2>
-            <img src="{{ image_url }}" alt="Uploaded Image">
-        </div>
+            {% if predicted_pokemon %}
+            <div class="image-preview-container">
+                <div class="image-preview">
+                    <h2>Uploaded Image:</h2>
+                    <img src="{{ image_url }}" alt="Uploaded Image">
+                </div>
+                {% if predicted_image_base64 %}
+                <div class="image-preview">
+                    <h2>Predicted Pokémon:</h2>
+                    <img src="data:image/jpeg;base64,{{ predicted_image_base64 }}" alt="Predicted Pokémon">
+                </div>
+                {% endif %}
+            </div>
 
-        {% if predicted_image_base64 %}
-        <div class="image-preview">
-            <h2>Predicted Pokémon:</h2>
-            <img src="data:image/jpeg;base64,{{ predicted_image_base64 }}" alt="Predicted Pokémon">
-        </div>
-        {% endif %}
+            <div class="result">
+                <p><strong>Pokémon Name:</strong> {{ predicted_pokemon }}</p>
+                <p><strong>Dex Number:</strong> {{ dex_number }}</p>
+                <div class="types-container">
+                    <strong>Types:</strong>
+                    <div class="types">
+                        {% for type in types %}
+                        <span class="type-badge type-{{ type | lower }}">{{ type }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- <p><strong>Similarity:</strong> {{ similarity_percentage | round(2) }}%</p> -->
 
-        <div class="result">
-            <p><strong>Pokémon Name:</strong> {{ predicted_pokemon }}</p>
-            <p><strong>Similarity:</strong> {{ similarity_percentage | round(2) }}%</p>
+                <h3 style="text-align: center;">Base Stats</h3>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Stat</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat, value in base_stats.items() %}
+                        <tr class="stat-{{ stat | replace_spaces }}">
+                            <td>{{ stat | capitalize }}</td>
+                            <td>{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
+
+    <script>
+        function showFileName() {
+            const fileInput = document.getElementById('file');
+            const fileName = document.getElementById('file-name');
+            fileName.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : 'No file chosen';
+        }
+    
+        function showSpinner() {
+            // Hide the Pokémon data and image preview containers
+            const result = document.querySelector('.result');
+            const previewContainer = document.querySelector('.image-preview-container');
+            
+            if (result) result.style.display = 'none';
+            if (previewContainer) previewContainer.style.display = 'none';
+            
+            // Display the spinner
+            const spinner = document.getElementById('spinner');
+            spinner.style.display = 'block';
+        }
+    </script>
+    
 </body>
 
 </html>
