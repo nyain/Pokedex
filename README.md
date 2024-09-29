@@ -11,7 +11,6 @@ This project implements an image recognition and classification model using a Co
   - Base stats
   - Typing
   - Pokédex number
-- Includes a similarity score to indicate the confidence of the prediction.
 
 ### Technologies Used:
 - **Flask**: For building the web application and serving the model.
@@ -61,7 +60,7 @@ Ensure the following are installed on your system:
 #### Notes:
 - The application resizes uploaded images to fit the model's input dimensions.
 - Images are processed in real-time, and no unnecessary files are saved to the server.
-- 
+  
 ### Future Enhancements:
 - **Expand Dataset:** Include Pokémon from additional generations and variations to improve model accuracy and robustness.
 - **Model Improvements:** Experiment with advanced CNN architectures or transfer learning to enhance classification performance.
