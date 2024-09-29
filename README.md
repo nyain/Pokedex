@@ -30,6 +30,7 @@ For those interested in exploring the model and its training process, a Jupyter 
     ```bash
     mkdir static
     ```
+5. Make sure you already have the dataset. You can scrape the dataset from this [repository](https://github.com/nyain/Pokemon-Image-Scraper)
 
 ## Usage
 
