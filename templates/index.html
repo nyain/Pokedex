@@ -82,20 +82,30 @@
                 <!-- Display Pokémon evolution chain -->
                 {% if evolution_chain %}
                 <h3>Evolution Data</h3>
-                <div class="evolution-chain">
-                    {% for evolution in evolution_chain %}
-                    <div class="evolution-stage">
-                        <img src="{{ evolution.sprite_url }}" alt="{{ evolution.name }}" width="100">
-                        <p>{{ evolution.name | replace('_', ' ') | capitalize }}</p>
+                <div class="evolution-container">
+                    <div class="evolution-stages">
+                        {% for evolution in evolution_chain %}
+                        <div class="evolution-stage">
+                            <div class="evolution-image">
+                                <img src="{{ evolution.sprite_url }}" alt="{{ evolution.name }}" class="pokemon-sprite">
+                            </div>
+                            <p class="pokemon-name">{{ evolution.name | replace('_', ' ') | capitalize }}</p>
+                            {% if evolution.conditions %}
+                            <div class="evolution-conditions">
+                                {% for condition in evolution.conditions %}
+                                <span class="condition">{{ condition }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if not loop.last %}
+                        <div class="evolution-arrow">→</div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
-                    {% if not loop.last %}
-                    <!-- Arrow or separator for evolutions -->
-                    <div class="evolution-arrow">→</div>
-                    {% endif %}
-                    {% endfor %}
                 </div>
                 {% endif %}
-
             </div>
             {% endif %}
         </div>

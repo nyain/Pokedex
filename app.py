@@ -291,24 +291,67 @@ def get_pokemon_base_stats(pokemon_name):
 
 def get_evolution_chain(evolution_chain_url):
     evolution_data = fetch_data_with_cache(evolution_chain_url)
-    
+
     if evolution_data:
         evolution_chain = evolution_data['chain']
         evolutions = []
-        
-        def parse_evolution(evolution_chain):
+
+        def parse_evolution(evolution_chain, parent=None):
             pokemon_name = evolution_chain['species']['name']
-            url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_name}'
-            pokemon_data = fetch_data_with_cache(url)
-            if pokemon_data:
-                sprite_url = pokemon_data['sprites']['other']['official-artwork']['front_default']
-                evolutions.append({
-                    'name': pokemon_name,
-                    'sprite_url': sprite_url
-                })
+            species_url = f'https://pokeapi.co/api/v2/pokemon-species/{pokemon_name}'
+            species_data = fetch_data_with_cache(species_url)
+
+            if species_data:
+                base_form_name = species_data['varieties'][0]['pokemon']['name']
+                pokemon_url = f'https://pokeapi.co/api/v2/pokemon/{base_form_name}'
+                pokemon_data = fetch_data_with_cache(pokemon_url)
+
+                if pokemon_data:
+                    sprite_url = pokemon_data['sprites']['other']['official-artwork']['front_default']
+                    evolution_conditions = []
+
+                    
+                    if parent is None:
+                        evolution_conditions.append("Unevolved")
+
+                    
+                    if 'evolution_details' in evolution_chain:
+                        for detail in evolution_chain['evolution_details']:
+                            if detail.get('gender') is not None:
+                                gender = 'Male' if detail['gender'] == 2 else 'Female'
+                                evolution_conditions.append(f'Evolves if {gender}')
+                            if detail.get('trigger'):
+                                trigger = detail['trigger']['name']
+                                evolution_conditions.append(f'Evolution trigger: {trigger}')
+                            if detail.get('item'):
+                                item = detail['item']['name']
+                                evolution_conditions.append(f'Item required: {item}')
+                            if detail.get('held_item'):
+                                held_item = detail['held_item']['name']
+                                evolution_conditions.append(f'Held item: {held_item}')
+                            if detail.get('min_level'):
+                                evolution_conditions.append(f'Min level: {detail["min_level"]}')
+                            if detail.get('time_of_day'):
+                                evolution_conditions.append(f'Time of day: {detail["time_of_day"]}')
+                            if detail.get('known_move'):
+                                move = detail['known_move']['name']
+                                evolution_conditions.append(f'Must know move: {move}')
+                            if detail.get('known_move_type'):
+                                move_type = detail['known_move_type']['name']
+                                evolution_conditions.append(f'Move type required: {move_type}')
+
+                    
+                    evolutions.append({
+                        'name': pokemon_name,
+                        'sprite_url': sprite_url,
+                        'conditions': evolution_conditions,
+                        'parent': parent  
+                    })
+
+            
             for evo in evolution_chain['evolves_to']:
-                parse_evolution(evo)
-        
+                parse_evolution(evo, parent=pokemon_name)
+
         parse_evolution(evolution_chain)
         return evolutions
     return []
